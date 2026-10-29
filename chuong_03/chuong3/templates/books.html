@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Danh Sách Sách – Thư Viện{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+  .page-header h1 span { color: var(--muted); font-size: 1rem; font-weight: 400; }
+
+  /* Category filter */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  .filter-label { color: var(--muted); font-size: .85rem; font-weight: 500; margin-right: .25rem; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state p { font-size: 1rem; }
+
+  /* Table link */
+  .book-link { font-weight: 500; color: var(--accent2); }
+  .book-link:hover { text-decoration: underline; color: #fff; }
+
+  .year-badge {
+    font-size: .8rem;
+    color: var(--muted);
+    font-family: monospace;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Danh Sách Sách <span>&mdash; {{ books | length }} kết quả</span></h1>
+</div>
+
+{# Thanh lọc theo thể loại #}
+<div class="filter-bar">
+  <span class="filter-label">🏷 Thể loại:</span>
+  <a href="{{ url_for('books') }}"
+     class="btn btn-outline {{ 'active' if not selected_category }}">
+    Tất cả
+  </a>
+  {% for cat in categories %}
+  <a href="{{ url_for('books', category=cat) }}"
+     class="btn btn-outline {{ 'active' if selected_category == cat }}">
+    {{ cat | e }}
+  </a>
+  {% endfor %}
+</div>
+
+{# Bảng sách #}
+<div class="card">
+  {% if books %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tên sách</th>
+          <th>Tác giả</th>
+          <th>Năm</th>
+          <th>Thể loại</th>
+          <th>Trạng thái</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in books %}
+        <tr>
+          <td><span class="year-badge">#{{ book.id }}</span></td>
+          <td>
+            <a href="{{ url_for('book_detail', book_id=book.id) }}"
+               class="book-link">
+              {{ book.title | e }}
+            </a>
+          </td>
+          <td>{{ book.author | e }}</td>
+          <td><span class="year-badge">{{ book.year }}</span></td>
+          <td><span class="badge badge-purple">{{ book.category | e }}</span></td>
+          <td>
+            {% if book.available %}
+              <span class="badge badge-green">✓ Có sẵn</span>
+            {% else %}
+              <span class="badge badge-red">✗ Đang mượn</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📭</div>
+    <p>Không có sách nào trong thể loại <strong>{{ selected_category | e }}</strong>.</p>
+    <a href="{{ url_for('books') }}" class="btn btn-primary" style="margin-top:1rem;">
+      Xem tất cả sách
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
